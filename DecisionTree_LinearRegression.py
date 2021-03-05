@@ -1,9 +1,31 @@
 
 import numpy as np
-import pandas as pd
 from sklearn import linear_model as lm
 
 class Node():
+    
+    """
+    A class representing a single node of the entire tree
+    
+    ...
+    
+    Attributes
+    ----------
+    
+    feature_idx : int
+        The index of the feature where the node is being split
+    pivot_value : float/int
+        The value of the feature_idx where the node is split
+    model : sklearn model
+        The linear regression model for the node
+    depth : int
+        The current depth of the node (Root node is 0)
+    left_node : Node object
+        If the current node is not a leaf node, it stores the entire left child node
+    right_node : Node object
+        If the current node is not a leaf node, it stores the entire right child node
+    
+    """
     
     def __init__(self,feature_idx,pivot_value,linear_model,depth):
         
@@ -15,6 +37,67 @@ class Node():
         self.right_node = None  
         
 class LinearModelTree():
+    
+    """
+    A class representing the entire decision tree 
+    
+    ...
+    
+    Attributes
+    ----------
+    
+    reg_features : list
+        A list of feature indices (a subset of X) that is used to regress onto the output variable
+    max_depth : int
+        The maximum depth of the tree (default None)
+    min_samples_split : int
+        Minimum number of samples required in a node to perform a split (default 100)
+    min_sampls_leaf : int
+        Minimum number of samples that constitute a leaf (default 50)
+    model_type : str
+        Model used for linear regression (default 'Ridge')
+    num_cat : int
+        Maximum number of unique variables to treat a feature as a categorical variable (default 2)
+    num_cont : int
+        Maximum number of pivot points to check while performing a split for a continuous feature (default 100)
+    current_depth : int
+        The current depth of the node under consideration
+    depth : list
+        A list of every split made denoted by the current depth of the node
+    
+    
+    Methods
+    -------
+    
+    build_tree(X,y,depth=0)
+        Builds the entire tree from the root node to leaf nodes from the given data
+        
+    best_split(X,y)
+        Given the data, it finds the best possible split based on the linear split in the child nodes
+        
+    split_node(X,y,feature_idx,pivot_value)
+        Given the data, the index of the feature, and the pivot-value it returns the split child nodes
+        
+    feature_type(X,num_cat)
+        Given X and the num_cat, it returns all the features that are type categorical
+        
+    fit(X,y)
+        Returns the final tree fit with the training data X,y
+        
+    predict_one(X,cat)
+        Given a single data point and the set of categorical features it returns the prediction
+        
+    predict(X)
+        Returns the prediction for a collection of data points (could use for testing set)
+        
+    RMSE(X,y)
+        Returns the root mean squared error for a given X,y
+        
+    get_depth()
+        Returns the maximum depth achieved by the final tree
+    
+    
+    """
     
     def __init__(self,reg_features,max_depth=None,min_samples_split=100,min_samples_leaf=50,
                  model_type='Ridge',num_cat=2,num_cont=100):
@@ -28,9 +111,22 @@ class LinearModelTree():
         self.num_cont = num_cont
         self.current_depth = 0
         self.depth = [0]
-        self.final_depth = 0
     
     def build_tree(self,X,y,depth=0):
+        
+        """
+        Returns the tree built from the root to leaves
+        
+        Parameters
+        ----------
+        
+        X : numpy array
+            Predictors or input
+        y : numpy array shape (-1,1)
+            Output
+        depth : int
+            Used to mark the current depth of the node
+        """
         
         self.current_depth = depth
         
@@ -60,12 +156,22 @@ class LinearModelTree():
             node = Node('Leaf','None',reg_model,depth)
             self.current_depth = node.depth
             
-        self.final_depth = max(self.depth)
-            
         return node
     
     
     def best_split(self,X,y):
+        
+        """
+        Returns a dictionary of feature index, pivot value, and model
+        
+        Parameters
+        ----------
+        
+        X : numpy array
+            Predictors or input
+        y : numpy array shape (-1,1)
+            Output
+        """
     
         features_total = X.shape[1]
         r2 = []
@@ -113,6 +219,22 @@ class LinearModelTree():
             
     def split_node(self,X,y,feature_idx,pivot_value):
         
+        """
+        Returns the child left nodes and right nodes
+        
+        Parameters
+        ----------
+        
+        X : numpy array
+            Predictors or input
+        y : numpy array shape (-1,1)
+            Output
+        feature_idx : int
+            The index of the feature that is used to create the split
+        pivot_value : float/int
+            The value of the feature at which the split is made
+        """
+        
         cat = self.feature_type(X,self.num_cat)
     
         if feature_idx in cat:
@@ -131,6 +253,18 @@ class LinearModelTree():
     @staticmethod
     def feature_type(X,num_cat):
         
+        """
+        Returns a list of feature indices that are of type categorical
+        
+        Parameters
+        ----------
+        
+        X : numpy array
+            Predictors or input
+        num_cat : int
+            Maximum number of unique values in a feature to treat it as a categorical type 
+        """
+        
         cat = []
         features_total = X.shape[1]
         
@@ -143,12 +277,36 @@ class LinearModelTree():
         
     def fit(self,X,y):
         
+        """
+        Returns the final tree fit with the training data
+        
+        Parameters
+        ----------
+        
+        X : numpy array
+            Input or predictors of the training data
+        y : numpy array shape (-1,1)
+            Output of the training data
+        """
+        
         self.final_tree = self.build_tree(X,y)
         
         return self
         
         
     def predict_one(self,X,cat):
+        
+        """
+        Returns predictions for a single data point
+        
+        Paramters
+        ---------
+        
+        X : 1-d numpy array
+            A single input data point
+        cat : list
+            List of all categorical feature indices
+        """
             
         mytree = self.final_tree
 
@@ -167,7 +325,17 @@ class LinearModelTree():
         return mytree.model.predict(X[self.reg_features].reshape(-1,len(self.reg_features)))
         
     
-    def predict(self,X):    
+    def predict(self,X):
+        
+        """
+        Returns prediction for a set of inputs
+        
+        Paramters
+        ---------
+        
+        X : numpy array
+            Predictors or input
+        """
         
         cat = self.feature_type(X,self.num_cat)
         predictions = []
@@ -180,27 +348,28 @@ class LinearModelTree():
     
     def RMSE(self,X,y):
         
+        """
+        Returns the root mean squared error
+        
+        Parameters
+        ----------
+        
+        X : numpy array
+            Predictors or input
+        y : numpy array shape (-1,1)
+            Output
+        """
+        
         return np.sqrt((1/X.shape[0])*np.sum(np.square(self.predict(X)-y.reshape(-1,1))))
                                                      
                                                                                             
     def get_depth(self):
         
-        return self.final_depth
-    
-    
-    def get_leaves(self):
+        """
+        Returns the maximum depth of the generated tree
+        """
         
-        pass
-    
-    
-    def get_params(self):
-        
-        pass
-    
-    
-    def entire_tree(self):
-        
-        pass
+        return  max(self.depth)
                                          
                                                      
             
