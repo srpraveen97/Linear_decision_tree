@@ -2,11 +2,9 @@
 
 The file DecisionTree_LinearRegression.py contains the class LinearModelTree which is used to perform a decision tree algorithm with a linear regression model at the leaf nodes. 
 
-The purpose of this algorithm is to use a regular decision tree algorithm to build the tree and to use a linear regression model in each of the leaf nodes. A common example for this is the electricity demand forecasting. There is a piecewise linear relationship between temperature and electricity demand, depending on the seasons, hour of the day, etcetera. An example on how to use this algorithm is shown below.'
-
 ### When to use this algorithm?
 
-In practice, we do not generally know apriori if the data is piecewise linear and even if we did, it is hard to determine the pivot points. If we decide the data to be piecewise linear either based on visualization or domain knowledge, we could use the linear model tree algorithm.
+The purpose of this algorithm is to use a regular decision tree algorithm to build the tree and to use a linear regression model in each of the leaf nodes. In practice, we do not generally know apriori if the data is piecewise linear and even if we did, it is hard to determine the pivot points. If we decide the data to be piecewise linear either based on visualization or domain knowledge, we could use the linear model tree algorithm. A common example for this is the electricity demand forecasting. There is a piecewise linear relationship between temperature and electricity demand, depending on the seasons, hour of the day, and day of the week. 
 
 ### Example-1
 
