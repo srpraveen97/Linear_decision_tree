@@ -111,6 +111,14 @@ class LinearModelTree():
         self.num_cont = num_cont
         self.current_depth = 0
         self.depth = [0]
+        
+    def raise_errors(self):
+        
+        if not type(self.reg_features) is list:
+            raise TypeError('reg_features should be of type list!')
+        if not type(self.num_cont) is int:
+            raise TypeError('num_cont should be of type int!')
+        
     
     def build_tree(self,X,y,depth=0):
         
@@ -147,12 +155,12 @@ class LinearModelTree():
                 node.right_node = self.build_tree(X_r,y_r,depth+1)
                 
             else:
-                reg_model = lm.Ridge().fit(X[:,self.reg_features].reshape(-1,len(self.reg_features)),y.reshape(-1,1))
+                reg_model = lm.Ridge().fit(X[:,self.reg_features],y.reshape(-1,1))
                 node = Node('Leaf','None',reg_model,depth)       
                 self.current_depth = node.depth
         
         else:
-            reg_model = lm.Ridge().fit(X[:,self.reg_features].reshape(-1,len(self.reg_features)),y.reshape(-1,1))
+            reg_model = lm.Ridge().fit(X[:,self.reg_features],y.reshape(-1,1))
             node = Node('Leaf','None',reg_model,depth)
             self.current_depth = node.depth
             
@@ -288,6 +296,8 @@ class LinearModelTree():
         y : numpy array shape (-1,1)
             Output of the training data
         """
+        
+        self.raise_errors()
         
         self.final_tree = self.build_tree(X,y)
         
