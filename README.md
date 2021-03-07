@@ -12,7 +12,7 @@ I am going to illustrate the use of the algorithm with a single variable toy exa
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=y&space;=&space;\left\{&space;\begin{array}{ll}&space;2x&space;&plus;&space;3&space;&&space;x\leq&space;50&space;\\&space;7&space;&&space;50&space;<&space;x\leq&space;100&space;\\&space;-3x&space;&plus;&space;5&space;&&space;100&space;<&space;x\leq&space;150&space;\\&space;\end{array}&space;\right.\" target="_blank"><img src="https://latex.codecogs.com/gif.latex?y&space;=&space;\left\{&space;\begin{array}{ll}&space;2x&space;&plus;&space;3&space;&&space;x\leq&space;50&space;\\&space;7&space;&&space;50&space;<&space;x\leq&space;100&space;\\&space;-3x&space;&plus;&space;5&space;&&space;100&space;<&space;x\leq&space;150&space;\\&space;\end{array}&space;\right.\" title="y = \left\{ \begin{array}{ll} 2x + 3 & x\leq 50 \\ 7 & 50 < x\leq 100 \\ -3x + 5 & 100 < x\leq 150 \\ \end{array} \right.\" /></a>
 
-In Example1.py, I generated toy data (train and test) for the above function with random noise.
+In Example1.py, I generated toy data (train and test) for the above function with random noise. Use the following code to initialize, fit the training data, and predict and score on the test data.
 
 ```python
 from DecisionTree_LinearRegression import LinearModelTree as lmt
