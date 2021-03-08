@@ -14,16 +14,27 @@ class Node():
     
     feature_idx : int
         The index of the feature where the node is being split
+        
     pivot_value : float/int
         The value of the feature_idx where the node is split
+        
     model : sklearn model
         The linear regression model for the node
+        
     depth : int
         The current depth of the node (Root node is 0)
+        
     left_node : Node object
         If the current node is not a leaf node, it stores the entire left child node
+        
     right_node : Node object
         If the current node is not a leaf node, it stores the entire right child node
+        
+    model_intercept : float 
+        Stores the model intercept for the leaf nodes (default None)
+        
+    model_coef : np array
+        Stores the model coeffcients for the leaf nodes (default None)
     
     """
     
@@ -35,6 +46,8 @@ class Node():
         self.depth = depth
         self.left_node = None
         self.right_node = None  
+        self.model_intercept = None
+        self.model_coef = None
         
 class LinearModelTree():
     
@@ -48,20 +61,28 @@ class LinearModelTree():
     
     reg_features : list
         A list of feature indices (a subset of X) that is used to regress onto the output variable
+        
     max_depth : int
         The maximum depth of the tree (default None)
+        
     min_samples_split : int
         Minimum number of samples required in a node to perform a split (default 100)
+        
     min_sampls_leaf : int
         Minimum number of samples that constitute a leaf (default 50)
+        
     model_type : str
         Model used for linear regression (default 'Ridge')
+        
     num_cat : int
         Maximum number of unique variables to treat a feature as a categorical variable (default 2)
+        
     num_cont : int
         Maximum number of pivot points to check while performing a split for a continuous feature (default 100)
+        
     current_depth : int
         The current depth of the node under consideration
+        
     depth : list
         A list of every split made denoted by the current depth of the node
     
@@ -92,6 +113,9 @@ class LinearModelTree():
         
     RMSE(X,y)
         Returns the root mean squared error for a given X,y
+        
+    tree_param(mytree=None,tree_val=[])
+        Returns the entire structure of the tree as a list with the parameters of each node
         
     get_depth()
         Returns the maximum depth achieved by the final tree
@@ -156,14 +180,17 @@ class LinearModelTree():
                 
             else:
                 reg_model = lm.Ridge().fit(X[:,self.reg_features],y.reshape(-1,1))
-                node = Node('Leaf','None',reg_model,depth)       
+                node = Node('Leaf','None',reg_model,depth)
+                node.model_intercept = reg_model.intercept_
+                node.model_coef = reg_model.coef_
                 self.current_depth = node.depth
         
         else:
             reg_model = lm.Ridge().fit(X[:,self.reg_features],y.reshape(-1,1))
             node = Node('Leaf','None',reg_model,depth)
+            node.model_intercept = reg_model.intercept_
+            node.model_coef = reg_model.coef_
             self.current_depth = node.depth
-            
         return node
     
     
@@ -212,7 +239,7 @@ class LinearModelTree():
                     
                     model_l_store.append(model_l)
                     model_r_store.append(model_r)
-
+                    
                     avg_r2 = 0.5*np.abs(model_l.score(X_l[:,self.reg_features],y_l)) + 0.5*np.abs(model_r.score(X_r[:,self.reg_features],y_r))
                     r2.append(avg_r2)
                         
@@ -281,7 +308,7 @@ class LinearModelTree():
                 cat.append(feature_idx)
                 
         return cat  
-        
+    
         
     def fit(self,X,y):
         
@@ -371,8 +398,46 @@ class LinearModelTree():
         """
         
         return np.sqrt((1/X.shape[0])*np.sum(np.square(self.predict(X)-y.reshape(-1,1))))
+    
+    
+    def tree_param(self,mytree=None,tree_val = []):
+        
+        """
+        Returns the entire structure of the tree along with the split and model parameters
+        
+        (feature index, pivot value, linear model intercept, linear model slopes)
+        
+        Parameters
+        ----------
+        
+        mytree : Node object 
+                A node object containing the tree, subtree or leaf node
+        tree_val : list
+                A list containing the split and model parameters of the entire tree
+        """
+        
+        if len(tree_val) == 0:
+            mytree = self.final_tree
+        
+        if mytree:
+            tree_val.append((mytree.feature_idx,mytree.pivot_value,mytree.model_intercept,mytree.model_coef))
+            tree_val = self.tree_param(mytree.left_node,tree_val)
+            tree_val = self.tree_param(mytree.right_node,tree_val)
+            
+        return tree_val
                                                      
-                                                                                            
+                       
+    def get_n_leaves(self):
+        
+        """
+        Returns the number of leaf nodes in the final tree
+        """                    
+        
+        tree_val = self.tree_param()
+        
+        return [feature[0] for feature in tree_val].count('Leaf')
+
+                                                                     
     def get_depth(self):
         
         """
