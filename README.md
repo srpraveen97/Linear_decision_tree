@@ -28,3 +28,4 @@ model.predict(X_test)
 model.RMSE(X_test,y_test)
 ```
 
+### Example-2
