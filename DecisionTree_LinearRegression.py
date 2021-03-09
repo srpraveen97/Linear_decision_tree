@@ -117,8 +117,8 @@ class LinearModelTree():
     RMSE(X,y)
         Returns the root mean squared error for a given X,y
         
-    tree_param(mytree=None,tree_val=[])
-        Returns the entire structure of the tree as a list with the parameters of each node
+    tree_param(mytree,tree_val=[])
+        Given the final tree, it returns a list of regression coefficients at each node
         
     get_depth()
         Returns the maximum depth achieved by the final tree
@@ -351,6 +351,7 @@ class LinearModelTree():
             Input or predictors of the training data
         y : numpy array shape (-1,1)
             Output of the training data
+            
         """
         
         self.raise_errors()
@@ -431,7 +432,7 @@ class LinearModelTree():
         return np.sqrt((1/X.shape[0])*np.sum(np.square(self.predict(X)-y.reshape(-1,1))))
     
     
-    def tree_param(self,mytree=None,tree_val = []):
+    def tree_param(self,mytree,tree_val = []):
         
         """
         Returns the entire structure of the tree along with the split and model parameters
@@ -446,9 +447,6 @@ class LinearModelTree():
         tree_val : list
                 A list containing the split and model parameters of the entire tree
         """
-        
-        if len(tree_val) == 0:
-            mytree = self.final_tree
         
         if mytree:
             tree_val.append((mytree.feature_idx,mytree.pivot_value,mytree.model_intercept,mytree.model_coef))
