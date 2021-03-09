@@ -102,6 +102,9 @@ class LinearModelTree():
     feature_type(X,num_cat)
         Given X and the num_cat, it returns all the features that are type categorical
         
+    pivot_value_dictionary(X)
+        Given the input array X, it returns the pivot values for all the features
+        
     fit(X,y)
         Returns the final tree fit with the training data X,y
         
@@ -212,16 +215,11 @@ class LinearModelTree():
         r2 = []
         feat_pivot = []
         model_l_store = []
-        model_r_store = []
+        model_r_store = []       
         
         for feature_idx in range(0,features_total):
             
-            cat = self.feature_type(X,self.num_cat)
-            
-            if feature_idx in cat:
-                pivot_values = np.unique(X[:,feature_idx])
-            else:
-                pivot_values = np.linspace(X[:,feature_idx].min(),X[:,feature_idx].max(),self.num_cont)
+            pivot_values = self.pivot_dict[feature_idx]
             
             for pivot_value in pivot_values:
                 
@@ -285,6 +283,7 @@ class LinearModelTree():
 
         return left_node,right_node
     
+    
     @staticmethod
     def feature_type(X,num_cat):
         
@@ -309,6 +308,32 @@ class LinearModelTree():
                 
         return cat  
     
+    
+    def pivot_value_dictionary(self,X):
+        
+        """
+        Returns a dictionary of feature indices as keys and pivot values as values of the dictionary
+        
+        Parameters
+        ----------
+        X : numpy array
+            Input or predictors of the training data
+
+        """
+        
+        cat = self.feature_type(X,self.num_cat)
+        features_total = X.shape[1]
+        pivot_dict = {}
+        
+        for feature_idx in range(0,features_total):
+            
+            if feature_idx in cat:
+                pivot_dict[feature_idx] = np.unique(X[:,feature_idx])
+            else:
+                pivot_dict[feature_idx] = np.round(np.linspace(X[:,feature_idx].min(),X[:,feature_idx].max(),self.num_cont),3)
+        
+        return pivot_dict
+    
         
     def fit(self,X,y):
         
@@ -325,6 +350,8 @@ class LinearModelTree():
         """
         
         self.raise_errors()
+        
+        self.pivot_dict = self.pivot_value_dictionary(X)
         
         self.final_tree = self.build_tree(X,y)
         
@@ -433,9 +460,9 @@ class LinearModelTree():
         Returns the number of leaf nodes in the final tree
         """                    
         
-        tree_val = self.tree_param()
+        tree_val_ = self.tree_param()
         
-        return [feature[0] for feature in tree_val].count('Leaf')
+        return [feature[0] for feature in tree_val_].count('Leaf')
 
                                                                      
     def get_depth(self):
