@@ -65,9 +65,6 @@ class LinearModelTree():
     max_depth : int
         The maximum depth of the tree (default None)
         
-    max_leaves : int
-        The maximum number of leaves in the final tree
-        
     min_samples_split : int
         Minimum number of samples required in a node to perform a split (default 100)
         
@@ -129,12 +126,11 @@ class LinearModelTree():
     
     """
     
-    def __init__(self,reg_features,max_depth=None,max_leaves=np.inf,min_samples_split=100,min_samples_leaf=50,
+    def __init__(self,reg_features,max_depth=None,min_samples_split=100,min_samples_leaf=50,
                  model_type='Ridge',num_cat=2,num_cont=100):
         
         self.reg_features = reg_features
         self.max_depth = max_depth
-        self.max_leaves = max_leaves
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
         self.model_type = model_type
@@ -171,15 +167,9 @@ class LinearModelTree():
         self.current_depth = depth
         
         if self.max_depth == None:
-            if self.max_leaves == np.inf:
-                cond = X.shape[0] >= self.min_samples_split
-            else:
-                cond = X.shape[0] >= self.min_samples_split and self.leaves_count < self.max_leaves
+            cond = X.shape[0] >= self.min_samples_split
         else:
-            if self.max_leaves == np.inf:
-                cond = X.shape[0] >= self.min_samples_split and self.current_depth < self.max_depth
-            else:
-                cond = X.shape[0] >= self.min_samples_split and self.current_depth < self.max_depth and self.leaves_count < self.max_leaves
+            cond = X.shape[0] >= self.min_samples_split and self.current_depth < self.max_depth
             
         if cond:
             split_dict = self.best_split(X,y)

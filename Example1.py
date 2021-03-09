@@ -19,7 +19,7 @@ mydata = pd.DataFrame({'col1':col1,'col2':col2})
 X_train = mydata.to_numpy()[:,[0]]
 y_train = mydata.to_numpy()[:,1]
 
-tree = lmt(reg_features=[0],num_cont=150,max_leaves=3)
+tree = lmt(reg_features=[0],num_cont=150)
 model = tree.fit(X_train,y_train)
 
 print(f'The root mean squared error is {model.RMSE(X_train,y_train)}')
