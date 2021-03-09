@@ -34,6 +34,8 @@ model2 = tree2.fit(X_train,y_train)
 
 model2.tree_param(model2.final_tree)
 
+model2.tree_param(model2.final_tree)
+
 tree3 = lmt(reg_features=[0],max_depth=4)
 model3 = tree3.fit(X_train,y_train)
 
