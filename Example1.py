@@ -46,8 +46,9 @@ for x in col1:
     else:
         pred.append(-0.1012*x + 15.1347)
 
-plt.plot(X_train,pred,color='tab:red')        
-plt.show()
+plt.plot(X_train,pred,color='tab:red',)   
+plt.xlabel('X') 
+plt.ylabel('y')    
 
-print(f'The root mean squared error is {model.RMSE(X_train,y_train)}')
+g = model.plot_tree(model.final_tree,columns=['x'])
 
