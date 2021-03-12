@@ -27,22 +27,11 @@ model = tree.fit(X_train,y_train)
 tree1 = lmt(reg_features=[0],max_depth=2)
 model1 = tree1.fit(X_train,y_train)
 
-model1.tree_param(model1.final_tree)
-
 tree2 = lmt(reg_features=[0],max_depth=3)
 model2 = tree2.fit(X_train,y_train)
-
-model2.tree_param(model2.final_tree)
-
-model2.tree_param(model2.final_tree)
 
 tree3 = lmt(reg_features=[0],max_depth=4)
 model3 = tree3.fit(X_train,y_train)
 
+g = model3.plot_tree(model3.final_tree,columns=['x'])
 
-
-
-
-plt.show()
-
-print(f'The root mean squared error is {model.RMSE(X_train,y_train)}')
