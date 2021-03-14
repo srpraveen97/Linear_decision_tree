@@ -36,6 +36,12 @@ class Node():
         
     model_coef : np array
         Stores the model coeffcients for the leaf nodes (default None)
+        
+    parent_node : Node object
+        Stores the parent node of the current node (default None)
+        
+    unique_id : int
+        An unique identification for each node created
     
     """
     
@@ -129,10 +135,11 @@ class LinearModelTree():
     
     """
     
-    def __init__(self,reg_features,max_depth=None,min_samples_split=100,min_samples_leaf=50,
+    def __init__(self,reg_features,criterion='R2',max_depth=None,min_samples_split=100,min_samples_leaf=50,
                  model_type='Ridge',num_cat=2,num_cont=100):
         
         self.reg_features = reg_features
+        self.criterion = criterion
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
@@ -230,6 +237,7 @@ class LinearModelTree():
     
         features_total = X.shape[1]
         r2 = []
+        # rmse = []
         feat_pivot = []
         model_l_store = []
         model_r_store = []       
@@ -257,9 +265,19 @@ class LinearModelTree():
                     
                     avg_r2 = 0.5*np.abs(model_l.score(X_l[:,self.reg_features],y_l)) + 0.5*np.abs(model_r.score(X_r[:,self.reg_features],y_r))
                     r2.append(avg_r2)
-                        
+                    
+                    # avg_rmse = 0.5*self.RMSE_percent(model_l.predict(X_l[:,self.reg_features]),y_l) + 0.5*self.RMSE_percent(model_r.predict(X_r[:,self.reg_features]),y_r)
+                    # rmse.append(avg_rmse)
+                    
                     feat_pivot.append((feature_idx,pivot_value))
         
+        # if self.criterion == 'RMSE':
+        #     try:
+        #         feature_idx,pivot_value = feat_pivot[np.argmin(rmse)]
+        #         return {'feature':feature_idx,'pivot_value':pivot_value,'split_data':self.split_node(X,y,feature_idx,pivot_value),'model':(model_l_store[np.argmin(rmse)],model_r_store[np.argmin(rmse)])}
+        #     except:
+        #         return {'feature':'Leaf','pivot_value':'None','split_data':'NoSplit','model':lm.Ridge().fit(X[:,self.reg_features].reshape(-1,len(self.reg_features)),y.reshape(-1,1))}
+        # else:    
         try:
             feature_idx,pivot_value = feat_pivot[np.argmax(r2)]
             return {'feature':feature_idx,'pivot_value':pivot_value,'split_data':self.split_node(X,y,feature_idx,pivot_value),'model':(model_l_store[np.argmax(r2)],model_r_store[np.argmax(r2)])}
@@ -478,18 +496,34 @@ class LinearModelTree():
                 else:
                     tree_val.append([(mytree.unique_id,columns[mytree.feature_idx],mytree.pivot_value,mytree.model_intercept,mytree.model_coef)])
             except TypeError:
-                    tree_val.append([(mytree.unique_id,mytree.feature_idx,mytree.model_intercept,mytree.model_coef)])
+                    tree_val.append([(mytree.unique_id,mytree.feature_idx,mytree.model_intercept,mytree.model_coef),(mytree.parent_node.feature_idx,mytree.parent_node.pivot_value)])
             tree_val = self.tree_param(mytree.left_node,columns,tree_val)
             tree_val = self.tree_param(mytree.right_node,columns,tree_val)
         return tree_val
     
     
-    def plot_tree(self,mytree,columns,g=None):
+    def plot_tree(self,mytree,columns,g=None,format_=None):
+        
+        """
+        Returns the decision tree plot for the tree fit with the training data
+        
+        Parameters
+        ----------
+        
+        mytree : Node object 
+                A node object containing the tree, subtree or leaf node
+        columns : list of str
+                A list of strings denoting the column names for the input matrix X
+        g : Graph object
+            A graphviz Graph object that stores and appends nodes and edges
+        format_ : str
+            Format of the resulting plot (defaul None -> 'pdf')            
+        """
         
         if g is None:
             g = Digraph('g',node_attr={'fontsize':'12', 
                          'shape':'box', 
-                         'color':'black'})
+                         'color':'black'},format=format_)
             
         if mytree:
             try:
@@ -524,6 +558,28 @@ class LinearModelTree():
         """
         
         return  max(self.depth)
+    
+    
+    @staticmethod
+    def RMSE_percent(y_pred,y):
+        
+        """
+        Returns percentage RMSE
+        
+        Parameters
+        ----------
+        
+        
+        """
+        
+        total = []
+        
+        for i in range(0,y.shape[0]):
+            
+            total.append(np.square((y_pred[i] - y[i])/y[i]))
+            
+        return np.sqrt((1/len(total))*(sum(total)))
+        
     
     
                                          
