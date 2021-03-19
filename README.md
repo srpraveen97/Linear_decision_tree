@@ -56,6 +56,6 @@ g.view() # A high resolution PDF file
 ```
 ![plot-2](Example1_tree.PNG)
 
-#### Current work
+#### Work in progress...
 1. Include metrics other than R-squared
 2. Incorporate weighted regression models
